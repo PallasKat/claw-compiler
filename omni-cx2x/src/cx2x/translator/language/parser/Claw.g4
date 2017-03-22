@@ -51,14 +51,20 @@ directive[ClawLanguage l]
   :
 
   // loop-fusion directive
+  // !$claw loop-fusion [group(group_id)] [collapse(n)]
     LOOP_FUSION loop_fusion_clauses[$l] EOF
     { $l.setDirective(ClawDirective.LOOP_FUSION); }
 
   // loop-interchange directive
+  // !$claw loop-interchange [(induction_var[, induction_var] ...)]
   | LOOP_INTERCHANGE loop_interchange_clauses[$l] EOF
     { $l.setDirective(ClawDirective.LOOP_INTERCHANGE); }
 
   // loop-extract directive
+  /* !$claw loop-extract range(range_info)
+   * [[map(var[,var]...:mapping[,mapping]...)
+   * [map(var[,var]...:mapping[,mapping]...)] ...]
+   * [fusion [group(group_id)]] [ parallel] [acc(directives)] */
   | LOOP_EXTRACT range_option mapping_option_list[m] loop_extract_clauses[$l] EOF
     {
       $l.setDirective(ClawDirective.LOOP_EXTRACT);
@@ -82,8 +88,12 @@ directive[ClawLanguage l]
     }
 
   // Array notation transformation directive
+  /* !$claw array-transform [induction(name [[,] name]...)] &
+   * !$claw [fusion [group(group_id)]] [parallel] &
+   * !$claw [acc([clause [[,] clause]...])] */
   | ARRAY_TRANS array_transform_clauses[$l] EOF
     {  $l.setDirective(ClawDirective.ARRAY_TRANSFORM); }
+  // [!$claw end array-transform]
   | END ARRAY_TRANS
     {
       $l.setDirective(ClawDirective.ARRAY_TRANSFORM);
@@ -91,17 +101,22 @@ directive[ClawLanguage l]
     }
 
   // loop-hoist directive
+  /* !$claw loop-hoist(induction_var[[, induction_var] ...]) &
+   * !$claw [reshape(array_name( target_dimension[,kept_dimensions]))] &
+   * !$claw [interchange [(induction_var[[, induction_var] ...])]] */
   | LOOP_HOIST '(' ids_list[o] ')' loop_hoist_clauses[$l] EOF
     {
       $l.setHoistInductionVars(o);
       $l.setDirective(ClawDirective.LOOP_HOIST);
     }
+  // !$claw end loop-hoist
   | END LOOP_HOIST EOF
     {
       $l.setDirective(ClawDirective.LOOP_HOIST);
       $l.setEndPragma();
     }
   // on the fly directive
+  // !$claw call array_name=function_call(arg_list)
   | ARRAY_TO_CALL array_name=IDENTIFIER '=' fct_name=IDENTIFIER '(' identifiers_list[o] ')' (target_clause[$l])?
     {
       $l.setDirective(ClawDirective.ARRAY_TO_CALL);
@@ -111,15 +126,21 @@ directive[ClawLanguage l]
     }
 
    // parallelize directive
+   /* !$claw define dimension dim_id(lower_bound:upper_bound) &
+    * [!$claw define dimension dim_id(lower_bound:upper_bound) &] ...
+    * !$claw parallelize [data(data(var_1[,var_2] ...)]
+    * [over (dim_id|:[,dim_id|:]...)] */
    | define_option[$l]* PARALLELIZE data_over_clause[$l]* parallelize_clauses[$l]
      {
        $l.setDirective(ClawDirective.PARALLELIZE);
      }
+   // !$claw parallelize forward
    | PARALLELIZE FORWARD parallelize_clauses[$l]
      {
        $l.setDirective(ClawDirective.PARALLELIZE);
        $l.setForwardClause();
      }
+   // TODO is it used ?
    | END PARALLELIZE
      {
        $l.setDirective(ClawDirective.PARALLELIZE);
@@ -127,10 +148,12 @@ directive[ClawLanguage l]
      }
 
    // ignore directive
+   // !$claw ignore
    | IGNORE
      {
        $l.setDirective(ClawDirective.IGNORE);
      }
+   // !$claw end ignore
    | END IGNORE
      {
        $l.setDirective(ClawDirective.IGNORE);
