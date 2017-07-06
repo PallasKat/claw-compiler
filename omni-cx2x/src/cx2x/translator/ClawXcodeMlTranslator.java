@@ -23,6 +23,8 @@ import cx2x.translator.transformation.claw.parallelize.ParallelizeForward;
 import cx2x.translator.transformation.loop.*;
 import cx2x.translator.transformation.openacc.DirectivePrimitive;
 import cx2x.translator.transformation.openacc.OpenAccContinuation;
+import cx2x.translator.transformation.operator.Exponentiation;
+import cx2x.translator.transformation.transcendental.Shadowing;
 import cx2x.translator.transformation.utility.UtilityRemove;
 import cx2x.translator.transformation.utility.XcodeMLWorkaround;
 import cx2x.translator.transformer.ClawTransformer;
@@ -179,6 +181,8 @@ public class ClawXcodeMlTranslator {
 
     // Add utility transformation
     addOrAbort(new XcodeMLWorkaround(new ClawLanguage(_program)));
+    addOrAbort(new Exponentiation(new ClawLanguage(_program)));
+    addOrAbort(new Shadowing(new ClawLanguage(_program)));
 
     // Analysis done, the transformation can be performed.
     _canTransform = true;
