@@ -1,4 +1,4 @@
 [submodule "omni-compiler"]
 	path = omni-compiler
 	url = https://github.com/PallasKat/omni-compiler-1.git
-	branch = parenthesis
+	branch = crclim
