@@ -10,10 +10,7 @@ import cx2x.xcodeml.transformation.Transformer;
 import cx2x.xcodeml.xnode.*;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Replace the usage of the exponentiation operator (**) by a function call and add the USE statement
@@ -23,11 +20,17 @@ import java.util.Set;
  * Created by Christophe Charpilloz on 05.07.17.
  */
 public class Exponentiation extends ClawTransformation {
-    private String usageModuleName = "mchpow";
-    private String powFunctionName = "POW";
+    private final String usageModuleName;
+    private final String powFunctionName ;
 
-    public Exponentiation(ClawLanguage directive) {
+    public static Exponentiation defaultPow(ClawLanguage directive) {
+        return new Exponentiation(directive, "exponentiation", "portable_pow");
+    }
+
+    public Exponentiation(ClawLanguage directive, String moduleName, String funcName) {
         super(directive);
+        usageModuleName = moduleName;
+        powFunctionName = funcName;
     }
 
     @Override
@@ -48,12 +51,22 @@ public class Exponentiation extends ClawTransformation {
      * @param fctType a dummy function type.
      * @throws IllegalTransformationException
      */
-    private void replaceExponentiation(Xnode fPow, XcodeProgram xcodeml, String fctType) throws IllegalTransformationException {
+    private void replaceExponentiation(
+        Xnode fPow,
+        XcodeProgram xcodeml,
+        String fctType
+    ) throws IllegalTransformationException {
         int nChildren = fPow.children().size();
         if (nChildren != 2)
-            throw new IllegalTransformationException("Unexpected number of arguments: " + nChildren, fPow.lineNo());
+            throw new IllegalTransformationException(
+                    "Unexpected number of arguments: " + nChildren, fPow.lineNo()
+            );
 
-        Xnode functionCall = xcodeml.createFctCall(Xname.TYPE_F_REAL, powFunctionName, fctType);
+        Xnode functionCall = xcodeml.createFctCall(
+                Xname.TYPE_F_REAL,
+                powFunctionName,
+                fctType
+        );
         Xnode argument = functionCall.matchDescendant(Xcode.ARGUMENTS);
         argument.append(fPow.child(0), true);
         argument.append(fPow.child(1), true);
@@ -62,7 +75,11 @@ public class Exponentiation extends ClawTransformation {
     }
 
     @Override
-    public void transform(XcodeProgram xcodeml, Transformer transformer, Transformation other) throws IllegalTransformationException {
+    public void transform(
+        XcodeProgram xcodeml,
+        Transformer transformer,
+        Transformation other
+    ) throws IllegalTransformationException {
         Set<Element> modModules = new HashSet<>();
 
         // get the exponentiation operator (**) usage
@@ -72,14 +89,20 @@ public class Exponentiation extends ClawTransformation {
             // get dummy function types in case we need to replace an
             // operator by a function call
             String fctType = CrClimHelper.addDummyFctType(xcodeml);
-
             for (Xnode fPow : fPowers) {
-                Xnode module = CrClimHelper.getModuleOrProgram(fPow);
-                replaceExponentiation(fPow, xcodeml, fctType);
-                if (! modModules.contains(module.element())) {
-                    // add the use statement
-                    modModules.add(module.element());
-                    CrClimHelper.addUseStatement(module, usageModuleName, xcodeml);
+                Optional<Xnode> optModule = CrClimHelper.getModule(fPow);
+                if (optModule.isPresent()) {
+                    Xnode module = optModule.get();
+                    replaceExponentiation(fPow, xcodeml, fctType);
+                    if (!modModules.contains(module.element())) {
+                        // add the use statement
+                        modModules.add(module.element());
+                        CrClimHelper.addUseStatement(module, usageModuleName, xcodeml);
+                    }
+                } else {
+                    throw new IllegalTransformationException(
+                        "Impossible to find program, module, function or subroutine"
+                    );
                 }
             }
         }

@@ -63,7 +63,7 @@ public class Shadowing extends ClawTransformation {
 
                 if (reversedTranscendentalMap.containsKey(funcName)) {
                     String moduleName = reversedTranscendentalMap.get(funcName);
-                    Xnode currentModule = CrClimHelper.getModuleOrProgram(fFCall);
+                    Xnode currentModule = CrClimHelper.getModule(fFCall).get();
                     Element elem = currentModule.element();
                     if (! modModules.containsKey(elem)) {
                         modModules.put(elem, new HashSet<>());

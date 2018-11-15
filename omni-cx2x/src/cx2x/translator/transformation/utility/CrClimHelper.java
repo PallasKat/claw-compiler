@@ -2,6 +2,9 @@ package cx2x.translator.transformation.utility;
 
 import cx2x.xcodeml.xnode.*;
 
+import java.util.Collection;
+import java.util.Optional;
+
 /**
  * Created by chris on 05.07.17.
  */
@@ -28,12 +31,16 @@ public class CrClimHelper {
      * @param  node The current node.
      * @return The module containing the node as an Xnode.
      */
-    public static Xnode getModuleOrProgram(Xnode node) {
+    public static Optional<Xnode> getModule(Xnode node) {
         Xnode module = node.findParentModule();
-        // if null then find PROGRAM node
-        if (module == null)
-            return node.matchAncestor(Xcode.FFUNCTIONDEFINITION);
-        return module;
+        // if null then find PROGRAM, FUNCTION or SUBROUTINE node
+        if (module == null) {
+            Xnode pfs = node.matchAncestor(Xcode.FFUNCTIONDEFINITION);
+            // if null then there is no PROGRAM or MODULE
+            if (pfs == null) return Optional.empty();
+            else return Optional.of(pfs);
+        }
+        else return Optional.of(module);
     }
 
     /**
@@ -46,6 +53,12 @@ public class CrClimHelper {
     public static void addUseStatement(Xnode currentModule, String moduleName, XcodeProgram xcodeml) {
         Xnode use = new Xnode(Xcode.FUSEDECL, xcodeml);
         use.setAttribute(Xattr.NAME, moduleName);
+        currentModule.matchDirectDescendant(Xcode.DECLARATIONS).insert(use, false);
+    }
+
+    public static void addUseStatements(Xnode currentModule, Collection<String> moduleName, XcodeProgram xcodeml) {
+        Xnode use = new Xnode(Xcode.FUSEDECL, xcodeml);
+        moduleName.forEach(name -> use.setAttribute(Xattr.NAME, name));
         currentModule.matchDirectDescendant(Xcode.DECLARATIONS).insert(use, false);
     }
 }
