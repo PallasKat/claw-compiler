@@ -1,23 +1,21 @@
 PROGRAM vector_loop
 
-
  CALL claw ( )
  CALL claw_transformed ( )
 END PROGRAM vector_loop
 
 SUBROUTINE claw ( )
+
  INTEGER :: j
  INTEGER :: vec1 ( 0 : 10 )
-
  INTEGER :: claw_induction_0
-
 
  DO j = 0 , 10 , 1
   vec1 ( j ) = j
  END DO
 !$acc parallel
 !$acc loop
- DO claw_induction_0 = 0 , 10
+ DO claw_induction_0 = 1 , size ( vec1 , 1 )
   vec1 ( claw_induction_0 ) = vec1 ( claw_induction_0 ) + 10
  END DO
 !$acc end parallel
@@ -25,12 +23,11 @@ SUBROUTINE claw ( )
 END SUBROUTINE claw
 
 SUBROUTINE claw_transformed ( )
+ INTEGER :: j
+
  INTEGER :: i = 10
  INTEGER :: vec1 ( 0 : 10 )
  INTEGER :: claw_induc1
- INTEGER :: j
-
-
 
  DO j = 0 , i , 1
   vec1 ( j ) = j

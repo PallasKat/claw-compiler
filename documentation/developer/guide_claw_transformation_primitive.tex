@@ -1,0 +1,112 @@
+\chapter{CLAW Primitives}
+\label{chapter:primitives}
+CLAW transformations, low-level or high-level, are built on various smaller 
+blocks that can be re-used in other transformations. Those blocks are called
+primitives as they define a well constrained test or transformation on the
+\xcodemlf AST. These primitives block use the \xcodemlf AST abstraction library
+detailed in Chapter \ref{chapter:astmanip}.
+The different primitives available in the CLAW framework are listed in this
+chapter.
+
+ 
+%TODO complete the chapter with all primitives
+\textit{!!! CURRENTLY NOT COMPLETE !!!}.
+
+\section{Loop primitive}
+In this section, primitive transformations applicable on do statements are 
+detailed.
+
+\subsection{Loop fusion (merge)}
+Loop fusion or merge is the process of merging the body of a slave loop into
+the one of a master loop.
+In \xcodemlf, a \lstinline|FdoStatement| has a child \lstinline|body| node.
+This \lstinline|body| node has 0 to N children. Performing a merge of two
+\lstinline|FdoStatement| is done by shifting all the element of the slave
+\lstinline|FdoStatement->body| to the master \lstinline|FdoStatement->body|.
+
+\subsubsection{API}
+Signatures of the available methods to perform a loop fusion are shown in
+Listing \ref{lst:pri_merge}. The first is used to perform a simple fusion 
+on two simple \lstinline|FdoStatement|. The second uses 
+\lstinline|NestedDoStatement| objects and will perform the merge of the 
+inner most bodies.
+
+\begin{lstlisting}[label=lst:pri_merge, language=java, title=Loop.java - merge]
+public static void merge(Xnode master, Xnode slave);
+public static void merge(NestedDoStatement master, NestedDoStatement slave);
+\end{lstlisting}
+
+
+\subsection{Loop reorder}
+Loop reorder is the process of swapping iteration range between nested loops.
+The current implementation support up to 3 nested loops to be reordered.
+\subsubsection{API}
+Signature of the available method to perform a loop reorder is shown in 
+Listing~\ref{lst:pri_reorder}. First parameter is a 
+\lstinline|NestedDoStatement| object representing the nested loops. The second
+parameter is the list of induction varibale in their new order.
+
+\begin{lstlisting}[label=lst:pri_reorder, language=java,title=Loop.java - reorder]
+public static void reorder(NestedDoStatement nestedGroup,
+                           List<String> newInductionVarOrder)
+\end{lstlisting}
+
+
+\section{Field primitive}
+%TODO
+
+
+\subsection{Scalar and arrays promotion}
+Promotion of a scalar or array field is defined as a primitive transformation.
+\lstinline|Field.promote| is the only method to be called to perform
+this transformation on a field.
+
+A promotion is defined by various elements. First, the dimension definition 
+describes a dimension that will be used for the promotion.
+In a promotion process, 1 to N dimension are added to an existing field type. 
+Each dimension definition can describe its insertion position regarding the 
+existing dimensions.
+
+
+\begin{lstlisting}[language=fortran]
+REAL, DIMENSION(1:10,1:20) :: a
+
+! Some dimensions used to illustrate the promotion process
+! Dimension description ndim(1:30)
+! Dimension description zdim(1:30)
+
+! Promoted with ndim before existing dimension
+REAL, DIMENSION(ndim,1:10,1:20) :: a
+! Promoted with ndim in middle existing dimensions
+REAL, DIMENSION(1:10,ndim,1:20) :: a
+! Promoted with ndim after existing dimensions
+REAL, DIMENSION(1:10,1:20,ndim) :: a
+
+! Promoted with ndim and zdim before existing dimension
+REAL, DIMENSION(ndim,zdim,1:10,1:20) :: a
+! Promoted with ndim and zdim in middle existing dimensions
+REAL, DIMENSION(1:10,ndim,zdim,1:20) :: a
+! Promoted with ndim,zdim after existing dimensions
+REAL, DIMENSION(1:10,1:20,ndim,zdim) :: a
+
+! Promoted with ndim before and zdim after existing dimension
+REAL, DIMENSION(ndim,1:10,1:20,zdim) :: a
+! Promoted with ndim in middle and zdim after existing dimensions
+REAL, DIMENSION(1:10,ndim,1:20,zdim) :: a
+! Promoted with ndim before and zdim in middle existing dimensions
+REAL, DIMENSION(1:10,1:20,ndim,zdim) :: a
+\end{lstlisting}
+
+\subsubsection{API}
+Signature of the available method to perform a promotion is shown in 
+Listing~\ref{lst:pri_promote}. The first parameter is a 
+\lstinline|PromotionInfo| object describing the promotion to be performed. The
+second parameter is the function definition in which the promotion is performed 
+and finally the current translation unit.
+
+\begin{lstlisting}[label=lst:pri_promote, language=java,
+  title=Field.java - promote]
+public static void promote(PromotionInfo fieldInfo, 
+                           FfunctionDefinition fctDef,
+                           XcodeProgram xcodeml)
+\end{lstlisting}

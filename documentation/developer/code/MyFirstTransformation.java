@@ -2,13 +2,13 @@
  * This file is released under terms of BSD license
  * See LICENSE file for more information
  */
-package cx2x.translator.transformation;
+package claw.wani.transformation;
 
-import cx2x.translator.language.base.ClawLanguage;
-import cx2x.translator.transformation.ClawTransformation;
-import cx2x.xcodeml.transformation.Transformation;
-import cx2x.xcodeml.transformation.Transformer;
-import cx2x.xcodeml.xnode.XcodeProgram;
+import claw.wani.language.ClawPragma;
+import claw.wani.transformation.ClawTransformation;
+import claw.shenron.transformation.Transformation;
+import claw.shenron.translator.Translator;
+import claw.tatsu.xcodeml.xnode.common;
 
 /**
  * Simple transformation for documentation example
@@ -16,20 +16,20 @@ import cx2x.xcodeml.xnode.XcodeProgram;
 public class MyFirstTransformation extends ClawTransformation {
 
   // Constructor that received the analyzed pragma as argument
-  public MyFirstTransformation(ClawLanguage directive) {
+  public MyFirstTransformation(ClawPragma directive) {
     super(directive);
   }
 
   // The analyzis step
-  public boolean analyze(XcodeProgram xcodeml, Transformer transformer) {
+  public boolean analyze(XcodeProgram xcodeml, Translator translator) {
     return true;
   }
 
   // The transformation step
-  public void transform(XcodeProgram xcodeml, Transformer transformer,
+  public void transform(XcodeProgram xcodeml, Translator translator,
                         Transformation other) throws Exception
   {
-    _claw.delete();
+    removePragma();
   }
 
   // Only used by dependent transformation

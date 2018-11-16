@@ -1,17 +1,22 @@
-# CLAW FORTRAN Compiler development
+# CLAW Compiler development
 
-Useful information about the development of the CLAW Fortran Compiler are given
+Useful information about the development of the CLAW Compiler are given
 on this page.
+
+### Developer's guide
+A guide is available under `documentation/developer`.
 
 ### Coding Style Guide
 Indent with spaces. NO tabs!
 
 #### Java code
 * An IDEA format configuration is available here:
-./omni-cx2x/config/claw_code_style_idea.xml
+[claw_code_style_idea.xml](./cx2t/config/claw_code_style_idea.xml)
+If IDEA IntelliJ is not used, the coding style should reflect this
+configuration.
 
 #### Bash scripts
-In general, all bash scripts written for the CLAW FORTRAN Compiler projects
+In general, all bash scripts written for the CLAW Compiler projects
 follow those guidelines: https://google.github.io/styleguide/shell.xml
 
 In addition, all scripts are tested with `shellcheck` and must pass the tested
@@ -19,6 +24,31 @@ without errors or warnings. So warnings might be disable where it make sense
 for the correctness of the script.
 
 The main word is: `Use common sense and BE CONSISTENT.`
+
+### Git hooks
+* Git hooks present in the `./scripts/git_hooks/` directory should be enabled
+  in your local checkout. To enable them, you have to symlink them in the
+  `./.git/hooks/` directory.
+
+```bash
+cd .git/hooks
+ln -s ../../scripts/pre-commit pre-commit
+```
+
+Make sure the the file is executable.
+
+### Helper scripts
+The `scripts` directory contains helper scripts for the development and review
+process of the project.
+
+#### Updating the OMNI Compiler submodule
+To update the OMNI Compiler submodule to the latest version, the developer can
+run `./scripts/update_omni` in its local repository from the master branch.
+The script will automatically do the following:
+* Create a dedicated branch name `omni/<short_hash>`.
+* Update the submodule to the current master.
+* Add and commit the new submodule.
+* Output the pull request message.
 
 ### Testing
 
@@ -38,7 +68,7 @@ transformation by the translator.
 Those tests can be found under `/test/`
 
 To build all the tests, use the following command. All the tests are transformed
-with the CLAW Fortran Compiler and then the original code as well as the
+with the CLAW Compiler and then the original code as well as the
 transformed are compiled with a standard Fortran compiler.
 
 ```bash
@@ -60,12 +90,12 @@ in a standalone mode.
 
 The option can be used as follows with an example of outputs:
 ```bash
-clawfc --dump-cx2x-args <other_args>
--- [DEBUG] Arguments for omni-cx2x:
+clawfc --dump-cx2t-args <other_args>
+-- [DEBUG] Arguments for cx2t:
    --config=/claw-compiler/driver/etc/claw-default.xml --schema=/claw-compiler/driver/etc/claw_config.xsd -w 80 -l  -M/claw-compiler/test/loops/fusion1  -o /tmp/__omni_tmp__65319/original_5f_code_f90_out.xml -f transformed_code.f90 /tmp/__omni_tmp__65319/original_5f_code_f90_in.xml
 ```
 
-It is recommended to use the `CLAW FORTRAN Compiler` with the `--debug` option in order to keep the intermediate files and ease the development/debugging of the translator.
+It is recommended to use the `CLAW Compiler` with the `--debug-omni` option in order to keep the intermediate files and ease the development/debugging of the translator.
 
 ### Driver
 

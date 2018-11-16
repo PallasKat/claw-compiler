@@ -1,13 +1,11 @@
 PROGRAM loop_fusion
 
-
  CALL clawloop ( )
 END PROGRAM loop_fusion
 
 SUBROUTINE clawloop ( )
+
  INTEGER :: i
-
-
 
  DO i = 1 , 5 , 1
   PRINT * ,"First loop body:" , i

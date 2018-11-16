@@ -1,14 +1,13 @@
-# Installation of the CLAW Fortran compiler
+# Installation of the CLAW Compiler
 
 ### Requirements
 
-The CLAW Fortran compiler has the followings dependencies:
+The CLAW Compiler has the followings dependencies:
 * Java 1.7 or greater
-* Ant 1.7.1 or greater
+* Ant 1.9 or greater
 * yacc, lex (For OMNI Compiler)
 * C/C++ compiler (supports C99) (For OMNI Compiler)
 * Fortran compiler (supports Fortran 90) (For OMNI Compiler)
-* MPI-2 or greater (For OMNI Compiler)
 * libxml2 (For OMNI Compiler)
 * cmake and make
 
@@ -16,17 +15,15 @@ The CLAW Fortran compiler has the followings dependencies:
 
 ### Build & install
 
-CLAW Fortran compiler (clawfc) is built on the top of the
-[OMNI Compiler](http://www,omni-compiler.org). It is currently tested with
-version [1.0.1](http://omni-compiler.org/download/stable/omnicompiler-1.0.1.tar.bz2).
+CLAW Compiler (clawfc) is built on the top of the [OMNI Compiler](http://www.omni-compiler.org).
 OMNI Compiler is packaged and built together with the CLAW Compiler.
 
 
-To build the and install the CLAW Fortran Compiler, use the followings commands.
+To build the and install the CLAW Compiler, use the followings commands.
 
 In source build:
 ```bash
-git clone git@github.com:C2SM-RCM/claw-compiler.git
+git clone git@github.com:claw-project/claw-compiler.git
 cd claw-compiler
 git submodule init
 git submodule update --remote
@@ -37,7 +34,7 @@ make install
 
 Out-of-source build:
 ```bash
-git clone git@github.com:C2SM-RCM/claw-compiler.git
+git clone git@github.com:claw-project/claw-compiler.git
 cd claw-compiler
 git submodule init
 git submodule update --remote
@@ -47,6 +44,11 @@ cmake -DCMAKE_INSTALL_PREFIX=<install_path> ..
 make
 make install
 ```
+
+##### Specific Java version
+If you have several Java compiler version installed on your machine, you must
+export the `JAVA_HOME` environment variable. This information will be picked
+by the build system for the entire project.
 
 ##### Offline build steps
 If your system has no network connection to the Internet, you need to get the
@@ -102,7 +104,7 @@ programming environment. So if you are compiling with PGI or GNU, use the
 following commands:
 
 ```bash
-git clone git@github.com:C2SM-RCM/claw-compiler.git
+git clone git@github.com:claw-project/claw-compiler.git
 cd claw-compiler
 git submodule init
 git submodule update --remote

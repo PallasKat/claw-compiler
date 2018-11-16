@@ -1,0 +1,228 @@
+<!--
+ This file is released under terms of BSD license
+ See LICENSE file for more information
+-->
+
+<project name="claw-test" default="main" basedir="."
+         xmlns:jacoco="antlib:org.jacoco.ant">
+  <description>Build CLAWX2T unit tests</description>
+
+  <dirname property="antfile.dir" file="${ant.file}"/>
+
+  <import file="../common-targets.xml"/>
+  <property file="../claw.properties"/>
+
+  <!-- JaCoCo code coverage -->
+  <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+    <classpath>
+      <pathelement path="${jacoco.dep}"/>
+      <pathelement path="${jacoco-core.dep}"/>
+      <pathelement path="${jacoco-report.dep}"/>
+      <pathelement path="${jacoco-agent.dep}"/>
+    </classpath>
+  </taskdef>
+
+  <!-- Java sources directory -->
+  <property name="src.dir" location="." />
+
+  <!-- Java compiled classes directory -->
+  <property name="build.dir" location="bin" />
+
+  <!-- Classpath for dependencies -->
+  <path id="build.path">
+    <pathelement path="${junit.dep}" />
+    <pathelement path="${st4.dep}"/>
+    <pathelement path="${antlr.dep}"/>
+    <pathelement path="${antlr4.dep}"/>
+    <pathelement path="${antlr4.runtime.dep}"/>
+    <pathelement path="${hamcrest.dep}" />
+    <pathelement path="${claw.tatsu.dep}" />
+    <pathelement path="${claw.shenron.dep}" />
+    <pathelement path="${claw.wani.dep}" />
+    <pathelement path="${omni.xcodeml-common.dep}"/>
+    <pathelement path="${toml.dep}"/>
+  </path>
+
+  <!-- Initialization step -->
+  <target name="init" depends="common.bootstrap">
+    <tstamp />
+    <mkdir dir="${build.dir}" />
+  </target>
+
+  <!-- Compile java sources -->
+  <target name="compile" depends="common.resolve"
+          description="compile the source">
+    <javac includeantruntime="false" srcdir="${src.dir}" destdir="${build.dir}"
+           classpathref="build.path" debug="on" />
+  </target>
+
+  <!-- Package compiled files into their own library -->
+  <target name="jar" depends="compile" description="package, output to JAR">
+    <mkdir dir="${dist.dir}" />
+    <jar jarfile="${dist.dir}/${claw.tatsu.ut.jar}" basedir="${build.dir}"
+         includes="claw/tatsu/** helper/**" />
+    <jar jarfile="${dist.dir}/${claw.shenron.ut.jar}" basedir="${build.dir}"
+         includes="claw/shenron/** helper/**" />
+    <jar jarfile="${dist.dir}/${claw.wani.ut.jar}" basedir="${build.dir}"
+         includes="claw/wani/** helper/**" />
+  </target>
+
+  <!-- Clean build -->
+  <target name="clean" description="clean up">
+    <delete dir="${build.dir}" />
+    <delete dir="${ivy.dir}" />
+    <delete file="${dist.dir}/${claw.tatsu.ut.jar}" />
+    <delete file="${dist.dir}/${claw.shenron.ut.jar}" />
+    <delete file="${dist.dir}/${claw.wani.ut.jar}" />
+  </target>
+
+  <!-- Execution of JUnit tests -->
+  <target name="junit-tatsu" depends="compile, jar">
+    <mkdir dir="${test.reports}" />
+
+    <jacoco:coverage destfile="${test.reports}/${jacoco.file}">
+      <junit fork="yes" printsummary="no" haltonfailure="yes">
+        <classpath path="${claw.tatsu.ut.dep}" />
+        <classpath path="${claw.tatsu.dep}" />
+        <classpath path="${junit.dep}" />
+        <classpath path="${hamcrest.dep}" />
+        <classpath path="${antlr.dep}" />
+        <classpath path="${antlr4.dep}" />
+        <classpath path="${antlr4.runtime.dep}" />
+        <classpath path="${omni.xcodeml-common.dep}"/>
+
+        <formatter type="xml" />
+
+        <batchtest fork="yes" todir="${test.reports}">
+          <fileset dir="${build.dir}">
+            <include name="claw/tatsu/**/*Test*.class"/>
+            <exclude name="**/TestConstant.class"/>
+          </fileset>
+        </batchtest>
+      </junit>
+    </jacoco:coverage>
+
+    <jacoco:report>
+      <executiondata>
+        <file file="${test.reports}/${jacoco.file}"/>
+      </executiondata>
+      <structure name="${ant.project.name}">
+        <classfiles>
+          <fileset dir="${build.dir}"/>
+        </classfiles>
+        <sourcefiles encoding="UTF-8">
+          <fileset dir="${src.dir}"/>
+        </sourcefiles>
+      </structure>
+      <html destdir="${test.reports}"/>
+    </jacoco:report>
+
+    <junitreport todir="${test.reports}">
+      <fileset dir="${test.reports}">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="${test.reports}" />
+    </junitreport>
+  </target>
+
+  <target name="junit-shenron" depends="compile, jar">
+    <mkdir dir="${test.reports}" />
+    <jacoco:coverage destfile="${test.reports}/${jacoco.file}" >
+    <junit fork="yes" printsummary="no" haltonfailure="yes">
+      <classpath path="${claw.shenron.ut.dep}" />
+      <classpath path="${claw.tatsu.dep}" />
+      <classpath path="${claw.shenron.dep}" />
+      <classpath path="${junit.dep}" />
+      <classpath path="${hamcrest.dep}" />
+      <classpath path="${antlr.dep}" />
+      <classpath path="${antlr4.dep}" />
+      <classpath path="${antlr4.runtime.dep}" />
+      <classpath path="${omni.xcodeml-common.dep}"/>
+
+      <formatter type="xml" />
+
+      <batchtest fork="yes" todir="${test.reports}">
+        <fileset dir="${build.dir}">
+          <include name="claw/shenron/**/*Test*.class"/>
+          <exclude name="**/TestConstant.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    </jacoco:coverage>
+
+    <jacoco:report>
+      <executiondata>
+        <file file="${test.reports}/${jacoco.file}"/>
+      </executiondata>
+      <structure name="${ant.project.name}">
+        <classfiles>
+          <fileset dir="${build.dir}"/>
+        </classfiles>
+        <sourcefiles encoding="UTF-8">
+          <fileset dir="${src.dir}"/>
+        </sourcefiles>
+      </structure>
+      <html destdir="${test.reports}"/>
+    </jacoco:report>
+
+    <junitreport todir="${test.reports}">
+      <fileset dir="${test.reports}">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="${test.reports}" />
+    </junitreport>
+  </target>
+
+  <target name="junit-wani" depends="compile, jar">
+    <mkdir dir="${test.reports}" />
+    <jacoco:coverage destfile="${test.reports}/${jacoco.file}" >
+    <junit fork="yes" printsummary="no" haltonfailure="yes">
+      <classpath path="${claw.wani.ut.dep}" />
+      <classpath path="${claw.tatsu.dep}" />
+      <classpath path="${claw.shenron.dep}" />
+      <classpath path="${claw.wani.dep}" />
+      <classpath path="${junit.dep}" />
+      <classpath path="${hamcrest.dep}" />
+      <classpath path="${antlr.dep}" />
+      <classpath path="${antlr4.dep}" />
+      <classpath path="${antlr4.runtime.dep}" />
+      <classpath path="${omni.xcodeml-common.dep}"/>
+      <classpath path="${toml.dep}"/>
+
+      <formatter type="xml" />
+
+      <batchtest fork="yes" todir="${test.reports}">
+        <fileset dir="${build.dir}">
+          <include name="claw/wani/**/*Test*.class"/>
+          <exclude name="**/TestConstant.class"/>
+        </fileset>
+      </batchtest>
+    </junit>
+    </jacoco:coverage>
+
+    <jacoco:report>
+      <executiondata>
+        <file file="${test.reports}/${jacoco.file}"/>
+      </executiondata>
+      <structure name="${ant.project.name}">
+        <classfiles>
+          <fileset dir="${build.dir}"/>
+        </classfiles>
+        <sourcefiles encoding="UTF-8">
+          <fileset dir="${src.dir}"/>
+        </sourcefiles>
+      </structure>
+      <html destdir="${test.reports}"/>
+    </jacoco:report>
+
+    <junitreport todir="${test.reports}">
+      <fileset dir="${test.reports}">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="${test.reports}" />
+    </junitreport>
+  </target>
+
+  <!-- Default target -->
+  <target name="main" depends="init, compile, jar" />
+</project>

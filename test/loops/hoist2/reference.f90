@@ -1,10 +1,10 @@
 PROGRAM claw_test
 
-
  CALL claw_hoist2 ( )
 END PROGRAM claw_test
 
 SUBROUTINE claw_hoist2 ( )
+
  INTEGER :: jt
  INTEGER :: i
  INTEGER :: j
@@ -16,10 +16,8 @@ SUBROUTINE claw_hoist2 ( )
  REAL :: var3
  REAL :: var4
  REAL :: var5
- TYPE :: dummy
-  REAL :: value1
-  REAL :: value2
- END TYPE dummy
+ REAL :: time_step_len
+ REAL :: zsedtend
  REAL :: array2d_1 ( 1 : 100 )
  REAL :: array2d_2
  REAL :: array2d_3 ( 1 : 10 , 1 : 100 )
@@ -27,22 +25,22 @@ SUBROUTINE claw_hoist2 ( )
  REAL :: array2d_5 ( 1 : 10 , 1 : 100 )
  REAL :: array3d_1 ( 1 : 10 , 1 : 100 , 1 : 2 )
  REAL :: array3d_2 ( 1 : 10 , 1 : 100 , 1 : 2 )
+ TYPE :: dummy
+  REAL :: value1
+  REAL :: value2
+ END TYPE dummy
  TYPE ( dummy ) :: tdum
- REAL :: zsedtend
- REAL :: time_step_len
-
-
 
  zsedtend = 1.0
  var3 = 2.0
  ntrac = 2
  klev = 10
  kproma = 100
- array2d_1 ( 1 : 100 ) = 0.0
+ array2d_1 ( : ) = 0.0
  array2d_2 = 0.0
- array2d_3 ( 1 : 10 , 1 : 100 ) = 0.0
- array2d_4 ( 1 : 10 , 1 : 100 ) = 0.0
- array2d_5 ( 1 : 10 , 1 : 100 ) = 0.0
+ array2d_3 ( : , : ) = 0.0
+ array2d_4 ( : , : ) = 0.0
+ array2d_5 ( : , : ) = 0.0
 !$ACC parallel loop gang vector collapse(2)
  DO jt = 1 , ntrac , 1
   DO i = 1 , kproma , 1
@@ -64,7 +62,7 @@ SUBROUTINE claw_hoist2 ( )
      array3d_2 ( i , j , jt ) = array3d_2 ( i , j , jt ) - var4
      array2d_1 ( j ) = var4 * array2d_4 ( i , j )
     END IF
-    IF ( j >= 2 ) THEN
+    IF ( j .ge. 2 ) THEN
      array3d_2 ( i , j , jt ) = array3d_2 ( i , j , jt ) + array2d_1 ( j - 1 )&
       / array2d_5 ( i , j )
     END IF

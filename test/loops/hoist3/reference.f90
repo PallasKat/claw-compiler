@@ -1,18 +1,16 @@
 PROGRAM loop_fusion
 
-
  CALL clawloop ( )
 END PROGRAM loop_fusion
 
 SUBROUTINE clawloop ( )
+
  INTEGER :: i
  INTEGER :: j
+ INTEGER :: k
  INTEGER :: iend = 2
  INTEGER :: jend = 4
  INTEGER :: kend = 2
- INTEGER :: k
-
-
 
  DO i = 0 , iend , 1
 !$claw loop-hoist(j,k) target(cpu)
@@ -36,7 +34,7 @@ SUBROUTINE clawloop ( )
      PRINT * ,"GPU First iteration of i" , i ,"/" , j ,"/" , k
     END IF
     PRINT * ,"GPU First loop body:" , i ,"/" , j ,"/" , k
-    IF ( j >= 2 ) THEN
+    IF ( j .ge. 2 ) THEN
      PRINT * ,"GPU Second loop body:" , i ,"/" , j ,"/" , k
     END IF
    END DO
